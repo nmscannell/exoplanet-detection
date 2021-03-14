@@ -8,16 +8,16 @@ metrics = [BinaryAccuracy(), Precision(), Recall(), AUC(), TrueNegatives(), True
 
 
 def basic_trans(local_steps, global_steps, n_features, lr,
-                 n1, n2, n3, drop1, drop2, num_heads, key_dim):
+                 n1, n2, n3, drop1, drop2, num_heads, key_dim, reg):
     inputA = Input(shape=(local_steps, n_features))
     inputB = Input(shape=(global_steps, n_features))
-    out = MultiHeadAttention(num_heads, key_dim, kernel_regularizer='l2')(inputA, inputB)
+    out = MultiHeadAttention(num_heads, key_dim, kernel_regularizer=l2(reg))(inputA, inputB)
     out = Flatten()(out)
-    out = Dense(n1, activation='relu')(out)
-    out = Dropout(drop1)(out)
-    out = Dense(n2, activation='relu')(out)
-    out = Dropout(drop2)(out)
-    out = Dense(n3, activation='relu')(out)
+#    out = Dense(n1, activation='relu')(out)
+#    out = Dropout(drop1)(out)
+#    out = Dense(n2, activation='relu')(out)
+#    out = Dropout(drop2)(out)
+#    out = Dense(n3, activation='relu')(out)
     out = Dense(1, activation='sigmoid')(out)
     model = Model(inputs=[inputA, inputB], outputs=out)
     opt = Adam(lr=lr)
@@ -26,12 +26,12 @@ def basic_trans(local_steps, global_steps, n_features, lr,
 
 
 def basic_trans2(local_steps, global_steps, n_features, lr,
-                 n1, n2, n3, drop1, drop2, num_heads, key_dim):
+                 n1, n2, n3, drop1, drop2, num_heads, key_dim, reg):
     inputA = Input(shape=(local_steps, n_features))
     inputB = Input(shape=(global_steps, n_features))
-    loc = MultiHeadAttention(num_heads, key_dim, kernel_regularizer='l2')(inputA, inputA)
+    loc = MultiHeadAttention(num_heads, key_dim, kernel_regularizer=l2(reg))(inputA, inputA)
     loc = Flatten()(loc)
-    glob = MultiHeadAttention(num_heads, key_dim, kernel_regularizer='l2')(inputB, inputB)
+    glob = MultiHeadAttention(num_heads, key_dim, kernel_regularizer=l2(reg))(inputB, inputB)
     glob = Flatten()(glob)
     out = concatenate([loc, glob])
     out = Dense(n1, activation='relu')(out)
